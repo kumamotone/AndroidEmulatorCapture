@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		AABDADD22CBFD7650090A05D /* AndroidEmulatorCaptureApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABDADD12CBFD7650090A05D /* AndroidEmulatorCaptureApp.swift */; };
-		AABDADD42CBFD7650090A05D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABDADD32CBFD7650090A05D /* ContentView.swift */; };
 		AABDADD62CBFD7660090A05D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AABDADD52CBFD7660090A05D /* Assets.xcassets */; };
 		AABDADD92CBFD7660090A05D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AABDADD82CBFD7660090A05D /* Preview Assets.xcassets */; };
 		AABDADE42CBFD7660090A05D /* AndroidEmulatorCaptureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABDADE32CBFD7660090A05D /* AndroidEmulatorCaptureTests.swift */; };
 		AABDADEE2CBFD7660090A05D /* AndroidEmulatorCaptureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABDADED2CBFD7660090A05D /* AndroidEmulatorCaptureUITests.swift */; };
 		AABDADF02CBFD7660090A05D /* AndroidEmulatorCaptureUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABDADEF2CBFD7660090A05D /* AndroidEmulatorCaptureUITestsLaunchTests.swift */; };
+		AABDADFD2CBFD9500090A05D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AABDADFC2CBFD9500090A05D /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +36,6 @@
 /* Begin PBXFileReference section */
 		AABDADCE2CBFD7650090A05D /* AndroidEmulatorCapture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AndroidEmulatorCapture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AABDADD12CBFD7650090A05D /* AndroidEmulatorCaptureApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AndroidEmulatorCaptureApp.swift; sourceTree = "<group>"; };
-		AABDADD32CBFD7650090A05D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AABDADD52CBFD7660090A05D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AABDADD82CBFD7660090A05D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AABDADDA2CBFD7660090A05D /* AndroidEmulatorCapture.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AndroidEmulatorCapture.entitlements; sourceTree = "<group>"; };
@@ -45,6 +44,7 @@
 		AABDADE92CBFD7660090A05D /* AndroidEmulatorCaptureUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AndroidEmulatorCaptureUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AABDADED2CBFD7660090A05D /* AndroidEmulatorCaptureUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AndroidEmulatorCaptureUITests.swift; sourceTree = "<group>"; };
 		AABDADEF2CBFD7660090A05D /* AndroidEmulatorCaptureUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AndroidEmulatorCaptureUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		AABDADFC2CBFD9500090A05D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,10 +96,10 @@
 			isa = PBXGroup;
 			children = (
 				AABDADD12CBFD7650090A05D /* AndroidEmulatorCaptureApp.swift */,
-				AABDADD32CBFD7650090A05D /* ContentView.swift */,
 				AABDADD52CBFD7660090A05D /* Assets.xcassets */,
 				AABDADDA2CBFD7660090A05D /* AndroidEmulatorCapture.entitlements */,
 				AABDADD72CBFD7660090A05D /* Preview Content */,
+				AABDADFC2CBFD9500090A05D /* Info.plist */,
 			);
 			path = AndroidEmulatorCapture;
 			sourceTree = "<group>";
@@ -235,6 +235,7 @@
 			files = (
 				AABDADD92CBFD7660090A05D /* Preview Assets.xcassets in Resources */,
 				AABDADD62CBFD7660090A05D /* Assets.xcassets in Resources */,
+				AABDADFD2CBFD9500090A05D /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,7 +260,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AABDADD42CBFD7650090A05D /* ContentView.swift in Sources */,
 				AABDADD22CBFD7650090A05D /* AndroidEmulatorCaptureApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
