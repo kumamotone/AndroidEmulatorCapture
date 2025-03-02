@@ -19,21 +19,67 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // adb の絶対パスを指定
     let adbPath = "/Users/k_kumamoto/Library/Android/sdk/platform-tools/adb"
 
+    var contentViewState = ContentViewState()
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         // ステータスバーにアイコンを追加
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem?.button {
             button.image = NSImage(systemSymbolName: "record.circle", accessibilityDescription: "Screen Record")
             button.action = #selector(toggleRecording)
+            // 通常のクリックで toggleRecording を呼び出す
+        }
+        
+        // 右クリックメニューの作成
+        let rightClickMenu = NSMenu()
+        
+        // ログイン時に起動するオプション
+        let launchAtLoginItem = NSMenuItem(title: "ログイン時に起動", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+        launchAtLoginItem.state = contentViewState.launchAtLogin ? .on : .off
+        rightClickMenu.addItem(launchAtLoginItem)
+        
+        rightClickMenu.addItem(NSMenuItem.separator())
+        rightClickMenu.addItem(NSMenuItem(title: "終了", action: #selector(quitApp), keyEquivalent: "q"))
+        
+        // 右クリック検出を設定
+        NSEvent.addLocalMonitorForEvents(matching: [.rightMouseDown]) { [weak self] event in
+            guard let self = self,
+                  let button = self.statusItem?.button,
+                  let buttonWindow = button.window,
+                  buttonWindow.isEqual(event.window),
+                  button.frame.contains(button.convert(event.locationInWindow, from: nil)) else {
+                return event
+            }
+            
+            DispatchQueue.main.async {
+                rightClickMenu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+            }
+            return nil
         }
     }
     
-    @objc func toggleRecording() {
+    @objc func toggleRecording(_ sender: AnyObject) {
+        // 左クリックで録画操作
         if recordingTask == nil {
             startRecording()
         } else {
             stopRecording()
         }
+    }
+    
+    @objc func toggleLaunchAtLogin(_ sender: NSMenuItem) {
+        // 現在の状態を反転
+        let newState = !contentViewState.launchAtLogin
+        
+        // 設定を更新
+        contentViewState.toggleLaunchAtLogin(newState)
+        
+        // メニューアイテムの表示を更新
+        sender.state = contentViewState.launchAtLogin ? .on : .off
+    }
+    
+    @objc func quitApp() {
+        NSApp.terminate(nil)
     }
 
     func startRecording() {
