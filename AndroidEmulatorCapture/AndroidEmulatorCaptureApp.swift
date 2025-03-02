@@ -93,7 +93,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let button = statusItem?.button {
             // 録画中の表示に変更
             button.image = NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: "Stop Record")
-            button.title = " Recording..."
         }
     }
 
@@ -151,8 +150,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.async {
             if let button = self.statusItem?.button {
                 // 録画終了後、表示を元に戻す
-                button.image = NSImage(systemSymbolName: "record.circle", accessibilityDescription: "Screen Record")
-                button.title = "" // "Recording..." の表示を消す
+                let newImage = NSImage(systemSymbolName: "record.circle", accessibilityDescription: "Screen Record")
+                button.image = newImage
             }
         }
     }
