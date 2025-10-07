@@ -1,13 +1,6 @@
-//
-//  AndroidEmulatorCaptureUITests.swift
-//  AndroidEmulatorCaptureUITests
-//
-//  Created by 熊本 和正 on 2024/10/16.
-//
-
 import XCTest
 
-final class AndroidEmulatorCaptureUITests: XCTestCase {
+final class DroidScreenCaptureUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

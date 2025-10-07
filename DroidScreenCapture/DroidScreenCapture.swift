@@ -499,7 +499,7 @@ struct ReadyPopoverView: View {
                 .font(.system(size: 16))
                 .foregroundColor(.green)
             
-            Text("AndroidEmulatorCapture is Ready!")
+            Text("DroidScreenCapture is Ready!")
                 .font(.system(size: 13))
         }
         .padding(.horizontal, 12)

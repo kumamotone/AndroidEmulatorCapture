@@ -1,13 +1,6 @@
-//
-//  AndroidEmulatorCaptureUITestsLaunchTests.swift
-//  AndroidEmulatorCaptureUITests
-//
-//  Created by 熊本 和正 on 2024/10/16.
-//
-
 import XCTest
 
-final class AndroidEmulatorCaptureUITestsLaunchTests: XCTestCase {
+final class DroidScreenCaptureUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

@@ -1,14 +1,7 @@
-//
-//  AndroidEmulatorCaptureTests.swift
-//  AndroidEmulatorCaptureTests
-//
-//  Created by 熊本 和正 on 2024/10/16.
-//
-
 import XCTest
-@testable import AndroidEmulatorCapture
+@testable import DroidScreenCapture
 
-final class AndroidEmulatorCaptureTests: XCTestCase {
+final class DroidScreenCaptureTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
