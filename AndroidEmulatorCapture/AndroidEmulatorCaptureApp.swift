@@ -20,11 +20,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var connectedDevices: [(id: String, model: String)] = []
     var selectedDeviceID: String = ""
     var readyPopover: NSPopover?
+    var settingsWindow: NSWindow?
     
-    // adb の絶対パスを指定
-    let adbPath = "/Users/k_kumamoto/Library/Android/sdk/platform-tools/adb"
-
     var contentViewState = ContentViewState()
+    var appSettings = AppSettings.shared
+    
+    var adbPath: String {
+        return appSettings.adbPath
+    }
+    
+    var savePath: String {
+        return appSettings.savePath
+    }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // ステータスバーにアイコンを追加
@@ -48,6 +55,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // デバイス情報を取得して表示
         updateDeviceInfo()
+        
+        rightClickMenu.addItem(NSMenuItem.separator())
+        
+        // 設定メニュー項目
+        rightClickMenu.addItem(NSMenuItem(title: "設定...", action: #selector(openSettings), keyEquivalent: ","))
         
         rightClickMenu.addItem(NSMenuItem.separator())
         
@@ -141,6 +153,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // メニューアイテムの表示を更新
         sender.state = contentViewState.launchAtLogin ? .on : .off
+    }
+    
+    @objc func openSettings() {
+        if settingsWindow == nil {
+            let settingsView = SettingsView()
+            let hostingController = NSHostingController(rootView: settingsView)
+            
+            let window = NSWindow(contentViewController: hostingController)
+            window.title = "設定"
+            window.styleMask = [.titled, .closable]
+            window.setContentSize(NSSize(width: 500, height: 300))
+            window.center()
+            
+            settingsWindow = window
+        }
+        
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     @objc func quitApp() {
@@ -338,12 +368,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let timestamp = dateFormatter.string(from: Date())
             
             // 保存ディレクトリを定義
-            let desktopPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/EmulatorScreenRecords")
-            let savePath = desktopPath.appendingPathComponent("screenrecord_\(timestamp).mp4").path
+            let saveDirectory = URL(fileURLWithPath: self.savePath)
+            let savePath = saveDirectory.appendingPathComponent("screenrecord_\(timestamp).mp4").path
             
             // ディレクトリが存在しない場合は作成
-            if !FileManager.default.fileExists(atPath: desktopPath.path) {
-                try? FileManager.default.createDirectory(at: desktopPath, withIntermediateDirectories: true, attributes: nil)
+            if !FileManager.default.fileExists(atPath: saveDirectory.path) {
+                try? FileManager.default.createDirectory(at: saveDirectory, withIntermediateDirectories: true, attributes: nil)
             }
             
             // 録画ファイルをローカルにpull
@@ -397,12 +427,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let timestamp = dateFormatter.string(from: Date())
             
             // 保存ディレクトリを定義
-            let desktopPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/EmulatorScreenRecords")
-            let savePath = desktopPath.appendingPathComponent("screenshot_\(timestamp).png").path
+            let saveDirectory = URL(fileURLWithPath: self.savePath)
+            let savePath = saveDirectory.appendingPathComponent("screenshot_\(timestamp).png").path
             
             // ディレクトリが存在しない場合は作成
-            if !FileManager.default.fileExists(atPath: desktopPath.path) {
-                try? FileManager.default.createDirectory(at: desktopPath, withIntermediateDirectories: true, attributes: nil)
+            if !FileManager.default.fileExists(atPath: saveDirectory.path) {
+                try? FileManager.default.createDirectory(at: saveDirectory, withIntermediateDirectories: true, attributes: nil)
             }
             
             // スクリーンショットを撮影
@@ -474,5 +504,138 @@ struct ReadyPopoverView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+    }
+}
+
+// アプリの設定を管理するクラス
+class AppSettings: ObservableObject {
+    static let shared = AppSettings()
+    
+    @Published var adbPath: String {
+        didSet {
+            UserDefaults.standard.set(adbPath, forKey: "adbPath")
+        }
+    }
+    
+    @Published var savePath: String {
+        didSet {
+            UserDefaults.standard.set(savePath, forKey: "savePath")
+        }
+    }
+    
+    private init() {
+        // デフォルト値を設定
+        let defaultAdbPath = "/Users/\(NSUserName())/Library/Android/sdk/platform-tools/adb"
+        let defaultSavePath = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Desktop/EmulatorScreenRecords").path
+        
+        self.adbPath = UserDefaults.standard.string(forKey: "adbPath") ?? defaultAdbPath
+        self.savePath = UserDefaults.standard.string(forKey: "savePath") ?? defaultSavePath
+    }
+}
+
+// 設定画面のビュー
+struct SettingsView: View {
+    @ObservedObject var settings = AppSettings.shared
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 15) {
+                // ADBパスの設定
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("ADB パス:")
+                        .font(.headline)
+                    
+                    HStack {
+                        TextField("adb のパス", text: $settings.adbPath)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        Button("選択...") {
+                            selectAdbPath()
+                        }
+                    }
+                    
+                    Text("例: /Users/username/Library/Android/sdk/platform-tools/adb")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Divider()
+                
+                // 保存先の設定
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("保存先フォルダ:")
+                        .font(.headline)
+                    
+                    HStack {
+                        TextField("保存先のパス", text: $settings.savePath)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        Button("選択...") {
+                            selectSavePath()
+                        }
+                    }
+                    
+                    Text("録画ファイルとスクリーンショットの保存先")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            HStack {
+                Button("デフォルトに戻す") {
+                    resetToDefaults()
+                }
+                
+                Spacer()
+                
+                Button("完了") {
+                    closeWindow()
+                }
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding()
+        }
+        .frame(width: 500, height: 300)
+    }
+    
+    func selectAdbPath() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.message = "adb の実行ファイルを選択してください"
+        
+        if panel.runModal() == .OK, let url = panel.url {
+            settings.adbPath = url.path
+        }
+    }
+    
+    func selectSavePath() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.message = "保存先フォルダを選択してください"
+        
+        if panel.runModal() == .OK, let url = panel.url {
+            settings.savePath = url.path
+        }
+    }
+    
+    func resetToDefaults() {
+        let defaultAdbPath = "/Users/\(NSUserName())/Library/Android/sdk/platform-tools/adb"
+        let defaultSavePath = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Desktop/EmulatorScreenRecords").path
+        
+        settings.adbPath = defaultAdbPath
+        settings.savePath = defaultSavePath
+    }
+    
+    func closeWindow() {
+        NSApplication.shared.keyWindow?.close()
     }
 }
