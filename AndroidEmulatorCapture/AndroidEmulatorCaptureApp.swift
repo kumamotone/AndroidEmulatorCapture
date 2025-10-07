@@ -58,6 +58,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         rightClickMenu.addItem(NSMenuItem.separator())
         rightClickMenu.addItem(NSMenuItem(title: "終了", action: #selector(quitApp), keyEquivalent: "q"))
         
+        // 左クリック検出を設定（Alt+クリックでスクリーンショット）
+        NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown]) { [weak self] event in
+            guard let self = self,
+                  let button = self.statusItem?.button,
+                  let buttonWindow = button.window,
+                  buttonWindow.isEqual(event.window),
+                  button.frame.contains(button.convert(event.locationInWindow, from: nil)) else {
+                return event
+            }
+            
+            // Optionキー（Alt）が押されているかチェック
+            if event.modifierFlags.contains(.option) {
+                // Alt+クリックの場合、スクリーンショットを撮影
+                self.captureScreenshot()
+                return nil
+            }
+            
+            // 通常のクリックの場合は、デフォルトのアクション（toggleRecording）を実行
+            return event
+        }
+        
         // 右クリック検出を設定
         NSEvent.addLocalMonitorForEvents(matching: [.rightMouseDown]) { [weak self] event in
             guard let self = self,
@@ -328,6 +349,65 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 // 録画終了後、表示を元に戻す
                 let newImage = NSImage(systemSymbolName: "record.circle", accessibilityDescription: "Screen Record")
                 button.image = newImage
+            }
+        }
+    }
+    
+    func captureScreenshot() {
+        // デバイスが選択されていない場合は処理しない
+        if selectedDeviceID.isEmpty {
+            let alert = NSAlert()
+            alert.messageText = "デバイスが選択されていません"
+            alert.informativeText = "スクリーンショットを撮影するには、まず右クリックメニューからデバイスを選択してください。"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            return
+        }
+        
+        DispatchQueue.global().async {
+            // タイムスタンプを生成 (例: 20241016_123456)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+            let timestamp = dateFormatter.string(from: Date())
+            
+            // 保存ディレクトリを定義
+            let desktopPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop/EmulatorScreenRecords")
+            let savePath = desktopPath.appendingPathComponent("screenshot_\(timestamp).png").path
+            
+            // ディレクトリが存在しない場合は作成
+            if !FileManager.default.fileExists(atPath: desktopPath.path) {
+                try? FileManager.default.createDirectory(at: desktopPath, withIntermediateDirectories: true, attributes: nil)
+            }
+            
+            // スクリーンショットを撮影
+            let screenshotTask = Process()
+            screenshotTask.launchPath = "/bin/bash"
+            screenshotTask.arguments = ["-c", "\(self.adbPath) -s \(self.selectedDeviceID) shell screencap -p /sdcard/screenshot_temp.png"]
+            screenshotTask.launch()
+            screenshotTask.waitUntilExit()
+            
+            // 少し待ってからファイルをpull
+            Thread.sleep(forTimeInterval: 0.5)
+            
+            // スクリーンショットをローカルにpull
+            let pullTask = Process()
+            pullTask.launchPath = "/bin/bash"
+            pullTask.arguments = ["-c", "\(self.adbPath) -s \(self.selectedDeviceID) pull /sdcard/screenshot_temp.png \(savePath) && \(self.adbPath) -s \(self.selectedDeviceID) shell rm /sdcard/screenshot_temp.png"]
+            pullTask.launch()
+            pullTask.waitUntilExit()
+            
+            // Finderで保存先のフォルダを開く
+            DispatchQueue.main.async {
+                let fileURL = URL(fileURLWithPath: savePath)
+                
+                // クリップボードにファイルをセット
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                pasteboard.writeObjects([fileURL as NSPasteboardWriting])
+                
+                // Finderでフォルダを開く
+                NSWorkspace.shared.activateFileViewerSelecting([fileURL])
             }
         }
     }
