@@ -19,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var deviceSubMenu: NSMenu?
     var connectedDevices: [(id: String, model: String)] = []
     var selectedDeviceID: String = ""
+    var readyPopover: NSPopover?
     
     // adb の絶対パスを指定
     let adbPath = "/Users/k_kumamoto/Library/Android/sdk/platform-tools/adb"
@@ -95,6 +96,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 rightClickMenu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
             }
             return nil
+        }
+        
+        // 起動完了メッセージを表示
+        showReadyPopover()
+    }
+    
+    func showReadyPopover() {
+        guard let button = statusItem?.button else { return }
+        
+        // ポップオーバーを作成
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: ReadyPopoverView())
+        popover.contentSize = NSSize(width: 260, height: 40)
+        
+        // メニューバーのボタンの下に表示
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        
+        readyPopover = popover
+        
+        // 10秒後に自動的に閉じる
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            self?.readyPopover?.performClose(nil)
+            self?.readyPopover = nil
         }
     }
     
@@ -433,5 +458,21 @@ class ContentViewState: ObservableObject {
             Swift.print(error.localizedDescription)
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
+    }
+}
+
+// 起動完了ポップオーバーのビュー
+struct ReadyPopoverView: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 16))
+                .foregroundColor(.green)
+            
+            Text("AndroidEmulatorCapture is Ready!")
+                .font(.system(size: 13))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 }
